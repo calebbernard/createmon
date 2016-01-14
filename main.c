@@ -62,8 +62,9 @@ int main(){
     setup_new_folder();
     fp = fopen("init", "r");
   }
-  
   fclose(fp);
+  main_game();
+  
   
 	refresh();
 	getch();
