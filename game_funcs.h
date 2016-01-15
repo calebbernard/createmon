@@ -12,5 +12,6 @@ void settings();
 void setup_new_folder();
 void main_game();
 void draw_map(int player_x, int player_y, int view_x, int view_y, int map_x, int map_y, char * map);
+int check_tile(int x, int y, int map_x, char * map);
 
 #endif

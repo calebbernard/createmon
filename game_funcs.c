@@ -47,31 +47,33 @@ void setup_new_folder(){
 
 void draw_map(int player_x, int player_y, int view_x, int view_y, int map_x, int map_y, char * map){
   clear();
-  int right_x = view_x / 2;
-  int left_x = view_x / 2 - 1;
-  int top_y = view_y / 2;
-  int bottom_y = view_y / 2 - 1;
+  int horizontal = view_x / 2;
+  int vertical = view_y / 2;
   int x,y;
   char tile;
-  int drawing_x, drawing_y;
-  for (x = 0; x < view_x; x++){
-    for (y = 0; y < view_y; y++){
-      if (player_x - left_x + x < 0){
+
+  for (y = 0; y < view_y; y++){
+    for (x = 0; x < view_x; x++){
+      if ((player_x - horizontal) + x < 0){
        tile = ' ';
-      } else if (player_x + right_x + x >= map_x){
+      } else if (player_x - horizontal + x >= map_x){
         tile = ' ';
-      } else if (player_y - top_y + y < 0){
+      } else if ((player_y - vertical) + y < 0){
         tile = ' ';
-      } else if (player_y + bottom_y + y >= map_y){
+      } else if (player_y - vertical + y >= map_y){
         tile = ' ';
       } else {
-        int col = player_x - left_x + x;
-        int row = player_y - top_y + y;
-        tile = map[row * map_x + col];
+        int col = (player_x - horizontal) + x;
+        int row = (player_y - vertical) + y;
+        tile = map[(row * map_x) + col];
       }
       mvaddch(y, x, tile);
     }
   }
+  
+  mvaddch(vertical, horizontal, '@');
+  
+  refresh();
 }
 
 void main_game(){
@@ -84,13 +86,10 @@ void main_game(){
   char room_path[156];
   strcpy(room_path, "map/");
   strcat(room_path, current_room);
-  
-  //center_print(1, room_path);
-  //refresh();
   fp = fopen(room_path, "r");
   int x, y, area, player_x, player_y;
-  player_x = 0;
-  player_y = 0;
+  player_x = 8;
+  player_y = 8;
   fscanf(fp, "%d %d", &x, &y);
   area = x * y;
   char * map;
@@ -101,9 +100,36 @@ void main_game(){
     fscanf(fp, "%s", &map[x*z]);
   }
   fclose(fp);
-    
-  draw_map(player_x, player_y, view_x, view_y, x, y, map);
   
+  int ch;
+  while(ch != 'q'){
+    draw_map(player_x, player_y, view_x, view_y, x, y, map);
+    ch = getch();
+    if (ch == KEY_UP){
+      if (check_tile(player_x, (player_y - 1), x, map)){
+        player_y--;
+      }
+    } else if (ch == KEY_DOWN){
+      if (check_tile(player_x, (player_y + 1), x, map)){
+        player_y++;
+      }
+    } else if (ch == KEY_LEFT){
+      if (check_tile((player_x - 1), player_y, x, map)){
+        player_x--;
+      }
+    } else if (ch == KEY_RIGHT){
+      if (check_tile((player_x + 1), player_y, x, map)){
+        player_x++;
+      }
+    }
+  }
+  
+}
 
-  
+int check_tile(int x, int y, int map_x, char * map){
+  if (map[(y * map_x) + x] == '#'){
+    return 0;
+  } else {
+    return 1;
+  }
 }
